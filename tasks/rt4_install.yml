@@ -32,8 +32,8 @@
 - name: Disable /rt subpath
   replace:
     path: /etc/request-tracker4/RT_SiteConfig.d/50-debconf.pm
+    regexp: '.*\$WebPath.*'
     replace: 'Set($WebPath , "");'
-    regexp: '\$WebPath'
   notify: restart fcgi
 
 - name: Enable and start rt4-fcgi

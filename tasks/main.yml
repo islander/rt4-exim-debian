@@ -11,6 +11,11 @@
       tags: [ rt4 ]
   tags: [ rt4 ]
 - include_tasks:
+    file: rt4_rtdb_init.yml
+    apply:
+      tags: [ rt4 ]
+  tags: [ rt4 ]
+- include_tasks:
     file: exim4_config.yml
     apply:
       tags: [ exim ]

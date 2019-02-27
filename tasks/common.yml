@@ -19,5 +19,6 @@
       'curl',
       'mutt',
       'htop',
+      'swaks',
     ]
     state: present
