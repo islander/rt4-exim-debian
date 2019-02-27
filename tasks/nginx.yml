@@ -1,0 +1,37 @@
+---
+- name: Install dependencies
+  apt:
+    pkg: software-properties-common
+    state: present
+
+- name: Install nginx repo keys
+  apt_key:
+    url: https://nginx.org/keys/nginx_signing.key
+    state: present
+
+- command: apt-key fingerprint ABF5BD827BD9BF62
+  register: nginx_fingerprint
+  changed_when: false
+
+- debug: msg="{{ nginx_fingerprint.stdout }}"
+
+- name: Install nginx repository
+  apt_repository:
+    repo: "deb http://nginx.org/packages/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} nginx"
+    state: present
+    update_cache: true
+    filename: nginx
+  register: nginx_repo
+
+- name: Install nginx
+  apt:
+    pkg: nginx
+    state: latest
+  when: nginx_repo is changed
+
+- name: Enable nginx service and ensure it is not masked
+  systemd:
+    name: nginx
+    state: started
+    enabled: true
+    masked: false

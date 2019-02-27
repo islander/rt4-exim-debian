@@ -1,0 +1,19 @@
+request_tracker4:
+  debug_print = "R: request_tracker4 for \
+                    $local_part$local_part_suffix@$domain \
+                    (calling ${substr_1:${if eq{$local_part_suffix}{}\
+                                       {-correspond}\
+                                       {$local_part_suffix} }})"
+  driver = redirect
+  domains = +rt4_domains
+  local_parts = mysql; QUEUENAME_QUERY
+  local_part_suffix = -comment
+  local_part_suffix_optional
+  pipe_transport = rt_mailgate_pipe
+  data = "|/usr/bin/rt-mailgate \
+           --queue \"${lookup mysql{QUEUENAME_QUERY}}\" \
+           --action ${substr_1:${if eq{$local_part_suffix}{}\
+                                        {-correspond}\
+                                        {$local_part_suffix} }} \
+           --url RT4_URL"
+  user = www-data

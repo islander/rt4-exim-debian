@@ -1,0 +1,36 @@
+---
+- name: Install dependencies
+  apt:
+    state: present
+    pkg: [
+      "software-properties-common",
+      "python-mysqldb",
+      "python-pip",
+      "python-dev",
+      "default-libmysqlclient-dev",
+    ]
+
+- name: Install mariadb keys
+  apt_key:
+    keyserver: "keyserver.ubuntu.com"
+    id: "0xF1656F24C74CD1D8"
+    state: present
+
+- name: Install mariadb apt repositories
+  apt_repository:
+    repo: "deb [arch=amd64,i386,ppc64el] http://mirror.timeweb.ru/mariadb/repo/10.3/debian stretch main"
+    state: present
+    update_cache: true
+    filename: MariaDB
+  register: mariadb_repo
+
+- name: Install mariadb server and client apt packages
+  apt:
+    pkg: [
+      "mariadb-server",
+      "mariadb-client",
+    ]
+    state: latest
+  when: mariadb_repo is changed
+
+- include_tasks: mysql_secure_installation.yml

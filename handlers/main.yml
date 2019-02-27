@@ -1,0 +1,14 @@
+---
+# handlers file for rt4-exim-debian
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+
+- name: restart fcgi
+  service:
+    name: rt4-fcgi
+    state: restarted
+
+- name: reconfigure exim
+  command: dpkg-reconfigure -fnoninteractive exim4-config

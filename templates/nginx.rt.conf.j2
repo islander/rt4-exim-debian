@@ -1,0 +1,27 @@
+server {
+        listen 80;
+
+        server_name {{ inventory_hostname }};
+        client_max_body_size 10m;  # should be equal of rt's $MaxAttachmentSize
+
+        location /NoAuth/images/ {
+                try_files local/html$uri
+                        share/html$uri
+                        @main
+                        ;
+                expires 1M;
+        }
+        location / {
+            include         /etc/nginx/fastcgi_params;
+            fastcgi_pass unix:/var/run/rt4-fcgi.sock;
+            fastcgi_param   SCRIPT_NAME     "";
+            fastcgi_param   PATH_INFO       $uri;
+        }
+        location @main {
+            fastcgi_pass    unix:/var/run/rt4-fcgi.sock;
+            include         /etc/nginx/fastcgi_params;
+            fastcgi_param   SCRIPT_NAME     "";
+            fastcgi_param   PATH_INFO       $uri;
+        }
+}
+

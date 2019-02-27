@@ -1,0 +1,22 @@
+---
+# tasks file for rt4-exim-debian
+- include_tasks: proxy.yml
+- include_tasks: common.yml
+- include_tasks: mariadb.yml
+- include_tasks: mysql_secure_installation.yml
+- include_tasks: nginx.yml
+- include_tasks:
+    file: rt4_install.yml
+    apply:
+      tags: [ rt4 ]
+  tags: [ rt4 ]
+- include_tasks:
+    file: exim4_config.yml
+    apply:
+      tags: [ exim ]
+  tags: [ exim ]
+- include_tasks:
+    file: exim4_rtdb.yml
+    apply:
+      tags: [ exim ]
+  tags: [ exim ]

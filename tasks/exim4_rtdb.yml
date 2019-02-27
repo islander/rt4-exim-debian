@@ -1,0 +1,41 @@
+---
+- set_fact:
+    exim_mysql_password: "{{ random_passwd }}"
+
+- name: Add exim mysql user for rtdb
+  mysql_user:
+    name: exim
+    host: localhost
+    password: "{{ exim_mysql_password }}"
+    priv: 'rtdb.Queues:SELECT (Disabled, CorrespondAddress, CommentAddress, Name, id)'
+    state: present
+
+- name: Copy exim RT4 defaults config
+  template:
+    src: templates/10_request-tracker4.j2
+    dest: /etc/exim4/conf.d/main/10_request-tracker4
+    owner: root
+    group: root
+    mode: 0644
+  notify: reconfigure exim
+
+- name: Copy exim RT4 router config
+  copy:
+    src: 950_exim4-config_rt4
+    dest: /etc/exim4/conf.d/router/950_exim4-config_rt4
+    owner: root
+    group: root
+    mode: 0644
+  notify: reconfigure exim
+
+- name: Add rt4 transport
+  blockinfile:
+    path: /etc/exim4/conf.d/transport/30_exim4-config_rt_pipe
+    create: true
+    block: |
+      rt_mailgate_pipe:
+        driver         = pipe
+        debug_print = "T: rt_mailgate_pipe for $local_part@$domain"
+        return_fail_output
+        allow_commands = /usr/bin/rt-mailgate
+  notify: reconfigure exim

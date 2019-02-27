@@ -1,0 +1,27 @@
+---
+- name: Create rtdb
+  mysql_db:
+    name: rtdb
+    state: present
+  register: db_created
+
+- name: Get rtuser creds
+  command: awk -F\' '/DatabasePassword/{print $2}' /etc/request-tracker4/RT_SiteConfig.d/51-dbconfig-common.pm
+  register: rtpasswd
+  failed_when: false
+  when: db_created is changed
+
+- name: Create mysql rtuser
+  mysql_user:
+    name: rtuser
+    host: localhost
+    password: "{{ rtpasswd.stdout }}"
+    priv: 'rtdb.*:ALL,GRANT'
+    state: present
+  register: rtuser
+  when: db_created is changed
+
+- name: Initialize rtdb schema
+  command: rt-setup-database --action init --dba root --skip-create
+  changed_when: false
+  when: db_created is changed

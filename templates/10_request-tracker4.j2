@@ -1,0 +1,8 @@
+RT4_URL = http://{{ inventory_hostname }}/
+hide mysql_servers = localhost/rtdb/exim/{{ exim_mysql_password }}
+domainlist rt4_domains = {{ inventory_hostname}}:{{ mailname }}
+
+QUEUENAME_QUERY   = \
+                  SELECT Name FROM Queues WHERE \
+                  CorrespondAddress = '${quote_mysql:$local_part}@${quote_mysql:$domain}' \
+                  AND Disabled = '0'

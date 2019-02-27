@@ -1,0 +1,44 @@
+---
+- name: Install request-tracker4 packages
+  apt:
+    name: [
+      "request-tracker4",
+      "rt4-db-mysql",
+      "rt4-fcgi",
+    ]
+    state: present
+    update_cache: true
+    cache_valid_time: 86400  # one day
+
+- name: Delete default nginx vhost symlink
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: restart nginx
+
+- name: Add rt4 web config
+  template:
+    src: templates/nginx.rt.conf.j2
+    dest: /etc/nginx/sites-available/rt
+  notify: restart nginx
+
+- name: Enable rt4 web interface
+  file:
+    src: /etc/nginx/sites-available/rt
+    dest: /etc/nginx/sites-enabled/rt
+    state: link
+  notify: restart nginx
+
+- name: Disable /rt subpath
+  replace:
+    path: /etc/request-tracker4/RT_SiteConfig.d/50-debconf.pm
+    replace: 'Set($WebPath , "");'
+    regexp: '\$WebPath'
+  notify: restart fcgi
+
+- name: Enable and start rt4-fcgi
+  systemd:
+    name: rt4-fcgi
+    state: started
+    enabled: true
+    masked: false

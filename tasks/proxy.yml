@@ -1,0 +1,8 @@
+---
+- name: Enable apt proxy
+  lineinfile:
+    path: /etc/apt/apt.conf.d/00aptproxy
+    state: present
+    line: 'Acquire::http::Proxy "http://{{ aptproxy }}:3142";'
+    create: true
+  when: aptproxy is defined

@@ -1,0 +1,38 @@
+---
+- name: Install Exim4 with MySQL support
+  apt:
+    name: exim4-daemon-heavy
+    state: present
+
+- name: Install debconf-get-selections
+  apt:
+    name: debconf-utils
+    state: present
+
+- name: Debconf exim4
+  debconf:
+    name: "exim4-config"
+    question: "{{ item.question }}"
+    value: "{{ item.value }}"
+    vtype: "{{ item.type }}"
+  with_items:
+    - { question: exim4/dc_localdelivery, type: select, value: "mbox format in /var/mail/" }
+    - { question: exim4/no_config, type: boolean, value: true }
+    - { question: exim4/dc_other_hostnames, type: string, value: "{{ inventory_hostname }}" }
+    - { question: exim4/dc_postmaster, type: string, value: root }
+    - { question: exim4/dc_local_interfaces, type: string, value: "0.0.0.0 ; ::1" }
+    - { question: exim4/mailname, type: string, value: "{{ mailname }}" }
+    - { question: exim4/use_split_config, type: boolean, value: true }
+    - { question: exim4/dc_minimaldns, type: boolean, value: false }
+    - { question: exim4/dc_eximconfig_configtype, type: select, value: "internet site; mail is sent and received directly using SMTP" }
+  notify: reconfigure exim
+
+- name: Remove exim config files
+  file: path={{ item }} state=absent
+  with_items:
+    - "/etc/exim4/update-exim4.conf.conf"
+    - "/etc/mailname"
+    - "/etc/exim4/conf.d/main/10_request-tracker4"
+    - "/etc/exim4/conf.d/router/950_exim4-config_rt4"
+    - "/etc/exim4/conf.d/transport/30_exim4-config_rt_pipe"
+  notify: reconfigure exim
