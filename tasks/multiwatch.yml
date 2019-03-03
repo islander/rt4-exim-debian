@@ -1,0 +1,23 @@
+---
+- name: Install multiwatch
+  apt:
+    pkg: multiwatch
+    state: present
+    cache_valid_time: 86400  # one day
+    update_cache: true
+
+- name: Create rt4-fcgi.service directory
+  file:
+    path: /etc/systemd/system/rt4-fcgi.service.d
+    state: directory
+
+- name: Overwrite rt4-fcgi.service ExecStart to use multiwatch
+  copy:
+    src: rt4-fcgi.service
+    dest: /etc/systemd/system/rt4-fcgi.service.d/override.conf
+
+- name: Restart rt4-fcgi.service
+  systemd:
+    state: restarted
+    daemon_reload: true
+    name: rt4-fcgi

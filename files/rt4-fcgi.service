@@ -1,0 +1,24 @@
+[Unit]
+Description=request-tracker4 FastCGI daemon
+
+[Service]
+Type=forking
+PIDFile=/var/run/%p.pid
+SyslogIdentifier=%p
+Environment=workers=1
+EnvironmentFile=-/etc/default/%p
+ExecStart=
+ExecStart=/usr/bin/spawn-fcgi \
+    -F ${workers} \
+    -d / \
+    -u www-data \
+    -g www-data \
+    -s /var/run/%p.sock \
+    -P /var/run/%p.pid \
+    -- /usr/bin/multiwatch -f 2 \
+    -- /usr/share/request-tracker4/libexec/rt-server.fcgi
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

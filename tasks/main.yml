@@ -16,6 +16,11 @@
       tags: [ rt4 ]
   tags: [ rt4 ]
 - include_tasks:
+    file: multiwatch.yml
+    apply:
+      tags: [ rt4 ]
+  tags: [ rt4 ]
+- include_tasks:
     file: exim4_config.yml
     apply:
       tags: [ exim ]
